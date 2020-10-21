@@ -1,0 +1,294 @@
+﻿@page
+@model SuperCarDealerManager.Pages.SupplierModel
+@{
+}
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>Super Car Dealer</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/album/">
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/navbars/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="~/css/bootstrap-4.5.3-dist/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/css/bootstrap-4.5.3-dist/css/bootstrap-grid.css" rel="stylesheet" />
+    <link href="~/css/bootstrap-4.5.3-dist/css/bootstrap-reboot.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link href="~/css/StyleSheet.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <header>
+
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Super Car Dealer</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarsExample04">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Supplier">Suppliers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Car">Cars</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Customer">Customers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Store">Store</a>
+                    </li>
+                    @*<li class="nav-item">
+                        <a class="nav-link disabled" href="#">Disabled</a>
+                        </li>*@
+                    @*<li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown04">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>*@
+                </ul>
+            </div>
+        </nav>
+
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+                integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+                crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(function () {
+                getSupplierList();
+            });
+            var supplier = {
+                id: 0,
+                supplierName: "",
+                email: "",
+                phone: ""
+            }
+            // Get all emps to display
+            function getSupplierList() {
+                // Call Web API to get a list of emps
+                $.ajax({
+                    url: '/api/Suppliers',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (suppliers) {
+                        supplierListSuccess(suppliers);
+                    },
+                    error: function (request, message, error) {
+                        handleException(request, message, error);
+                    }
+                });
+            }
+            // Display all emps returned from Web API call
+            function supplierListSuccess(suppliers) {
+                // Iterate over the collection of data
+                $("#supplierTable tbody").remove();
+                $.each(suppliers, function (index, supplier) {
+                    // Add a row to the emp table
+                    suppliersAddRow(supplier);
+                });
+            }
+            // Add emp row to <table>
+            function suppliersAddRow(supplier) {
+                // First check if a <tbody> tag exists, add one if not
+                if ($("#supplierTable tbody").length == 0) {
+                    $("#supplierTable").append("<tbody></tbody>");
+                }
+                // Append row to <table>
+                $("#supplierTable tbody").append(
+                    supplierBuildTableRow(supplier));
+            }
+            // Build a <tr> for a row of table data
+            function supplierBuildTableRow(supplier) {
+                var newRow = "<tr>" +
+                    "<td>" + supplier.id + "</td>" +
+                    "<td><input   class='input-supplierName' type='text' value='" + supplier.supplierName + "'/></td>" +
+                    "<td><input   class='input-email' type='email' value='" + supplier.email + "'/></td>" +
+                    "<td><input   class='input-phone' type='tel' value='" + supplier.phone + "'/></td>" +
+                    "<td>" +
+                    "<button type='button' " +
+                    "onclick='supplierUpdate(this);' " +
+                    "class='btn btn-default' " +
+                    "data-id='" + supplier.id + "' " +
+                    "data-supplierName='" + supplier.supplierName + "' " +
+                    "data-email='" + supplier.email + "' " +
+                    "data-phone='" + supplier.phone + "' " +
+                    ">" +
+                    "<span class='glyphicon glyphicon-edit' /> Update" +
+                    "</button> " +
+                    " <button type='button' " +
+                    "onclick='supplierDelete(this);'" +
+                    "class='btn btn-default' " +
+                    "data-id='" + supplier.id + "'>" +
+                    "<span class='glyphicon glyphicon-remove' />Delete" +
+                    "</button>" +
+                    "</td>" +
+                    "</tr>";
+                return newRow;
+            }
+            function onAddsupplier(item) {
+                var options = {};
+                options.url = "/api/AddSupplier";
+                options.type = "POST";
+                var obj = supplier;
+                obj.supplierName = $("#supplierName").val();
+                obj.email = $("#email").val();
+                obj.phone = $("#phone").val();
+                console.dir(obj);
+                options.data = JSON.stringify(obj);
+                options.contentType = "application/json";
+                options.dataType = "html";
+                options.success = function (msg) {
+                    getSupplierList();
+                    $("#msg").html(msg);
+                },
+                    options.error = function () {
+                        $("#msg").html("Error while calling the Web API!");
+                    };
+                $.ajax(options);
+            }
+            function supplierUpdate(item) {
+                var id = $(item).data("id");
+                var options = {};
+                options.url = "/api/UpdateSupplier/";
+                options.type = "PUT";
+                var obj = supplier;
+                obj.id = $(item).data("id");
+                obj.supplierName = $(".input-supplierName", $(item).parent().parent()).val();
+                obj.email = $(".input-email", $(item).parent().parent()).val();
+                obj.phone = $(".input-phone", $(item).parent().parent()).val();
+                console.dir(obj);
+                options.data = JSON.stringify(obj);
+                options.contentType = "application/json";
+                options.dataType = "html";
+                options.success = function (msg) {
+                    $("#msg").html(msg);
+                };
+                options.error = function () {
+                    $("#msg").html("Error while calling the Web API!");
+                };
+                $.ajax(options);
+            }
+            function supplierDelete(item) {
+                var id = $(item).data("id");
+                var options = {};
+                options.url = "/api/DeleteSupplier/"
+                    + id;
+                options.type = "DELETE";
+                options.dataType = "html";
+                options.success = function (msg) {
+                    console.log('msg= ' + msg);
+                    $("#msg").html(msg);
+                    getSupplierList();
+                };
+                options.error = function () {
+                    $("#msg").html("Error while calling the Web API!");
+                };
+                $.ajax(options);
+            }
+            // Handle exceptions from AJAX calls
+            function handleException(request, message, error) {
+                var msg = "";
+                msg += "Code: " + request.status + "\n";
+                msg += "Text: " + request.statusText + "\n";
+                if (request.responseJSON != null) {
+                    msg += "Message" + request.responseJSON.Message + "\n";
+                }
+                alert(msg);
+            }
+        </script>
+    </header>
+
+    <main role="main">
+        <h1 style="text-align:center;">Supplier</h1>
+        <!--
+        <table class="table table-responsive-md table-hover" style="width: 50%; margin: 0 auto; margin-bottom: 50px;">
+            <thead>
+                <tr>
+                    <th scope="col"><input type="checkbox" aria-label="Checkbox for following text input"></th>
+                    <th scope="col">Supplier Name</th>
+                    <th scope="col">Email Address</th>
+                    <th scope="col">Phone Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th><input type="checkbox" aria-label="Checkbox for following text input"></th>
+                    <td>Mark</td>
+                    <td>Otto@gmail.com</td>
+                    <td>345345345354</td>
+                </tr>
+                <tr>
+                    <th><input type="checkbox" aria-label="Checkbox for following text input"></th>
+                    <td>Jacob</td>
+                    <td>Jacob@gmail.com</td>
+                    <td>025865494564564</td>
+                </tr>
+                <tr>
+                    <th><input type="checkbox" aria-label="Checkbox for following text input"></th>
+                    <td>Larry</td>
+                    <td>Bird@gmail.com</td>
+                    <td>132423423243</td>
+                </tr>
+            </tbody>
+        </table>
+        -->
+
+        <form>
+            <table id="supplierTable" style="border: 1px solid #999" cellpadding="1">
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Supplier Name</td>
+                        <td> Email Address </td>
+                        <td> Phone Number </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input id="supplierName" type="text" /></td>
+                        <td><input id="email" type="email" /></td>
+                        <td><input id="phone" type="tel" /></td>
+                        <td><input type="button" id="insert" value="Insert" onclick='onAddsupplier(this)' /></td>
+                </thead>
+            </table>
+            <br />
+            <div id="msg"></div>
+        </form>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+    </main>
+
+
+    <footer class="footer text-muted bg-dark">
+        <div class="container">
+            <p class="float-right">
+                <a href="#">Back to top</a>
+            </p>
+            <p>Album example is &copy; Bootstrap, but please download and customize it for yourself!</p>
+            <p>New to Bootstrap? <a href="../../">Visit the homepage</a> or read our <a href="../../getting-started/">getting started guide</a>.</p>
+        </div>
+    </footer>
+</body>
+</html>
